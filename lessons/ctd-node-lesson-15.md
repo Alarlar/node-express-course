@@ -55,7 +55,6 @@ page is retrieved:
     after(async function () {
       this.timeout(5000);
       await browser.close();
-      server.close();
       return;
     });
     describe("got to site", function () {
