@@ -18,23 +18,23 @@ Here is a sample test case that uses Mocha and Chai.  It won't work for the pres
 describe("Jobs", function () {
   describe("GET /jobs", function () {
   // Test to get all jobs belonging to the logged on user
-    it("should get all jobs for the user", (done) => {
-      chai.request(app)
+    it("should get all jobs for the user", async () => {
+      // We need to get the values for request and expect here.
+      // More on that later.
+      const req = request.execute(app)
         .get('/api/v1/jobs')
         .send()
-        .end((err, res) => {
-           expect(res).to.have.status(200);
-           expect(res.body).to.be.a('object');
-           expect(res.body.jobs.length).to.equal(3); // or whatever is in your test data
-           done();
-         });
+      const res = await req()
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a('object');
+      expect(res.body.jobs.length).to.equal(3); // or whatever is in your test data
     });  
          ...
 ```
 The Mocha keywords here are "describe" and "it".  These organise the test suite into blocks and document the purpose of each test case.  The test above is not really complete, in that one would want to verify that
-the expected data is returned.  And, as written, the test would fail, or at least would return an empty object, because of course, no user is logged in.  So Mocha provides some additional keywords: before, beforeEach, after, and afterEach.  These for things such as logon to be done before or after a given block, or before or after each test case in the block.
+the expected data is returned.  And, as written, the test would fail, or at least would return an empty object, because of course, no user is logged in.  So Mocha provides some additional keywords: before, beforeEach, after, and afterEach.  These are for things such as logon to be done before or after a given block, or before or after each test case in the block.
 
-The Chai words here are, in this case, get, which returns a result or an error.  Of course there are put, post, patch, and delete as well. The get function is implemented in chai-http.
+The chai-http words here are, in this case, get, which returns a result or an error.  Of course there are put, post, patch, and delete as well. The get function is implemented in chai-http.  The Chai word we are using is expect, which checks that the result is correct.
 
 Some other things to think about: We have been using a single Mongo database for development. Were you building an actual production application, you would want separate databases for development, test, and production.  Also, for testing, you would want a way to populate the database with sample data, so that it is in a known state at the start of the test.  For this purpose, we'll use an npm package called factory-bot.
 
@@ -59,8 +59,7 @@ page is retrieved:
       return;
     });
     describe("got to site", function () {
-      it("should have completed a connection", function (done) {
-        done();
+      it("should have completed a connection", async () => {
       });
     });
     describe("people form", function () {
@@ -81,7 +80,7 @@ Then, we can start interacting with the form, as follows:
         await page.waitForNavigation();
         const resultDataDiv = await page.waitForSelector("#result");
         const resultData = await resultDataDiv.evaluate((element) => element.textContent);
-        resultData.should.include("A person record was added");
+        expect(resultData).to.include("A person record was added");
         ...
 ```
 Here you see the code that actually types into entry fields, and then clicks on the submit button.  You get the idea.
