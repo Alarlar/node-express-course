@@ -21,11 +21,11 @@ Create a test directory in your repository. This is where you will put the actua
   "test": "NODE_ENV=test mocha tests/*.js --timeout 5000 --exit",
 ```
 which will cause the tests to run.  It also sets the NODE_ENV environment variable, which we'll use to load the test version of the database.  Edit your app.js.  You'll have a line that reads something like:
-```
+```javascript
     const url = process.env.MONGO_URI;
 ```
 You should change it to look something like the following:
-```
+```javascript
 let mongoURL = process.env.MONGO_URI;
 if (process.env.NODE_ENV == "test") {
   mongoURL = process.env.MONGO_URI_TEST;
@@ -33,7 +33,7 @@ if (process.env.NODE_ENV == "test") {
 ```
 and then change url to mongoURL in the section that starts ```const store = ```.
 The point of this is so that your testing doesn't interfere with your production database, and also so that your production or development data doesn't interfere with your testing.  Also, you want to have a function that will bring the database to a known state, so that previous tests don't cause subsequent ones to give false results.  Create a file util/seed_db.js.  It should read as follows:
-```
+```javascript
 const Job = require("../models/Job");
 const User = require("../models/User");
 const faker = require("@faker-js/faker").fakerEN_US;
@@ -81,13 +81,13 @@ A couple of new ideas are introduced above.  First, faker is being used to gener
 These packages are now ESM only! This was, in my humble opinion, a questionable move on the part of the developers, and they made quite a few other breaking changes.  But we can accommodate these changes, without converting to ESM modules.  (Some students are using ESM modules for these exercises.  If you are doing this, discuss matters with your mentors if you have trouble.)
 
 For Chai 4 and Chai-http 4, we could do:
-```
+```javascript
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 chai.use(chaiHttp)
 ```
 This would give you access to chai.expect() (for evaluating results) and chai.request() (for sending http requests to the server and getting back the results).  This is not going to work for V5 of these packages: You can't use request() to load an ESM only module. Also you can only call chai.use() once, for all of your test files and cases.  So, we need the following utility module, util\get_chai.js:
-```
+```javascript
 let chai_obj = null;
 
 const get_chai = async () => {
@@ -109,7 +109,7 @@ In this way, we avoid using request(), and we can ensure that chai.use() is only
 ## Unit Testing a Function
 
 Create a file, utils/multiply.js.  It should export a function, multiply(), that takes two arguments and returns the product.  Now we can write a unit test, in tests/test_multipy.rb:
-```
+```javascript
 const multiply = require("../util/multiply");
 const get_chai = require("../util/get_chai");
 
@@ -131,7 +131,7 @@ Then do: ```npm run test``` You will see that the first test passes, but the sec
 ## Function Testing for An API
 
 Your current application doesn't have an API, so you can add one by adding the following, at an appropriate place (like before the not found handler) to app.js:
-```
+```javascript
 app.get("/multiply", (req, res) => {
   const result = req.query.first * req.query.second;
   if (result.isNaN) {
@@ -143,7 +143,7 @@ app.get("/multiply", (req, res) => {
 });
 ```
 You also have to change app.js to make your app available to the test.  The bottom of the file should look like:
-```
+```javascript
 const port = process.env.PORT || 3000;
 const start = () => {
   try {
@@ -165,7 +165,7 @@ Here, to facilitate testing, we have made start() synchronous. You can try the m
 http://localhost:3000/multiply?first=5&second=27
 ```
 Then create a test, a file tests/test_multiply_api.js, as follows:
-```
+```javascript
 const { app } = require("../app");
 const get_chai = require("../util/get_chai");
 
@@ -192,7 +192,7 @@ Note first of all that this file actually requires your app, which causes your a
 Of course, the application you are writing is not intended to provide an API.  Instead it provides rendered HTML pages.  You can test these as well.
 
 There are two annoying problems to deal with, one in Chai and one in the Express rendering engine.  In Express, when a page is rendered, it should set the Content-Type response header to be text/html.  But it doesn't.  The second problem is that if Chai receives a response without the Content-Type header, it tries to parse it as JSON, and throws an error if that fails. It should catch the error, but it doesn't, which is crude.  You can fix the issue by setting the Content-Type header appropriately with this middleware, which should be added to app.js before your routes:
-```
+```javascript
 app.use((req, res, next) => {
   if (req.path == "/multiply") {
     res.set("Content-Type", "application/json");
@@ -203,7 +203,7 @@ app.use((req, res, next) => {
 });
 ```
 Now create a simple UI test case, in tests/test_ui.js:
-```
+```javascript
 const { app } = require("../app");
 const get_chai = require("../util/get_chai");
 
@@ -223,7 +223,7 @@ In this case, you get a res.text, instead of a res.body.  The text is the actual
 ## Testing Registration 
 
 Here is a test for registration. You should put it in a file tests/registration_logon.js.
-```
+```javascript
 const { app } = require("../app");
 const { factory, seed_db } = require("../util/seed_db");
 const faker = require("@faker-js/faker").fakerEN_US;
@@ -289,11 +289,11 @@ If one of the expect() assertions fails, the rest of the code in that it() stanz
 ### A Reminder About Arrow Functions and Non-Arrow Functions
 
 You will notice that we declare anonymous functions two different ways:
-```
+```javascript
 describe("tests for registration and logon", function () {
 ```
 and
-```
+```javascript
   it("should get the registration page", async () => {
 ```
 The difference is that arrow functions do not have their own "this"!  They inherit the this of the context in which they were defined. So, when we save to the variable this.csrfToken, we do it in the context of the describe().  On that call to describe, we pass ```function ()```, and so the this is associated with that context. As a result this.csrfToken is available on our next it() call within that same describe, so long as that call to it() passes an arrow function.  There are, of course, other ways to save the token, such is in a variable with module scope.
@@ -305,11 +305,11 @@ Ok, so what do we post, and where do we post it? The post for register is /sessi
 When we post, we have to set the cookie for CSRF protection.  We also have to set the content-type, which would otherwise be JSON. We also have to include the csrfToken in the data that is posted, with the name _csrf.  We post the resulting information, and then search the database to verify that the user object was actually created.
 
 There could be two kinds of it() statements;
-```
+```javascript
   it("should get the registration page", (done) => {
 ```
 and
-```
+```javascript
   it("should register the user", async () => {
 ```
 In the first (old style) way, we pass a callback, the done() function, and that must be called at the completion of the test.  In the second way, we just declare an async function.  In our examples, we only use the second way, because we have to call get_chai(), which is asynchronous.
@@ -319,7 +319,7 @@ If the user is actually created, our controller sends a redirect.  By default, C
 ### An Aside on Status Codes
 
 When the controller gets an error from a post, it can render the page again
-```
+```javascript
       req.flash("error", "That email address is already registered.");
       return res.status(400).render("register", { errors: req.flash("error") });
 ```
@@ -328,7 +328,7 @@ Be careful to include the status(400).  If the status is 200, the request is exp
 ## Testing Logon
 
 We saved this.user and this.password, so we should be able to log in.  We'll skip actually loading the logon form -- you could add that test if you like -- and we'll do the post for logon.  When you logon, you are redirected.  By default, Chai then follows the redirection, but what it doesn't do is keep the cookies.  When you do the .send for the test, the cookies are already gone.  This is completely useless for logon. We need the session cookie for subsequent requests.  It is pretty poor in another way.  If you redirect, the session contains the flash information for user messages, but if the cookies are gone, so are the flash messages.  So, a better policy is to disable redirects by doing .redirects(0) on the request. If a redirect occurs, the status is 302, and the req.headers.location is the target for the redirect.  (Editorial aside: Chai really ought to save those cookies.) So, here is the logon test, which should be added to the previous describe() section:
-```
+```javascript
   it("should log the user on", async () => {
     const dataToPost = {
       email: this.user.email,
@@ -370,7 +370,7 @@ We saved this.user and this.password, so we should be able to log in.  We'll ski
 There are two parts to the test.  The first does the logon.  You get a redirect ... but it will redirect to the same place whether the logon succeeds or fails.  And you will have a session cookie even before you log in.  So how do you know whether the logon succeeded?  The only way is to get the index page again.  If the logon is successful, it will show the user's name, but if not, it will show the error message.  To do this, we have to include the session cookie in the request, as we do above.
 
 **Now: Some code for you to write.**  Create a test for logoff.  Logoff won't work unless there has been a logon, and unless you send the _csrf value and set cookies for both the csrfToken and the sessionCookie.  The latter code is:
-```
+```javascript
 .set("Cookie", this.csrfToken + ";" + this.sessionCookie)
 ```
 You need to post data, as before, but the only field in the data is ```_csrf```.  In this case, you let Chai follow the redirect, that is, do not do ```.redirects(0)```. You should get back a page that includes "link to logon".
@@ -378,7 +378,7 @@ You need to post data, as before, but the only field in the data is ```_csrf```.
 ## Testing Job CRUD Operations
 
 Create a new file, tests/crud_operations.js.  You will need a couple of extra require() statements, as follows:
-```
+```javascript
 const Job = require("../models/Job")
 const { seed_db, testUserPassword } = require("../util/seed_db");
 ```
@@ -386,7 +386,7 @@ The flow for testing CRUD operations is as follows.
 
 1. Seed the database! You have a utility routine for that in util/seed_db.js
 2. Logon! You will have to get the logon page to get the CSRF token and cookie. The seed_db.js module has a function to seed the database with a user entry, and it also exports the user's password, so you can use those. You'll need to save the session cookie.  Steps 1 and 2 are not tests, but you need an async before() call, inside your describe(), that does these things.  Here is the before() that completes steps 1 and 2:
-    ``` 
+    ```javascript 
       before(async () => {
         const { expect, request } = await get_chai();
         this.test_user = await seed_db();
@@ -421,13 +421,13 @@ The flow for testing CRUD operations is as follows.
       });
     ```
 3. Get the job list! You have to include the session cookie with your get request. The seed operation stores 20 entries. Your test should verify that a status 200 is returned, and that exactly 20 entries are returned.  That's a little complicated for an html page, but in this case, you can just check how many times "<tr>" appears on the page.  Here's how you might do that part:
-    ```
+    ```javascript
     const pageParts = res.text.split("<tr>")
     expect(pageParts).to.equal(21)
     ```
     As you can see, scanning the page to see if the result is correct is kind of messy.
 4. Add a job entry! This is a post for the job form. You will have to include _csrf in the post, and you will need to set the CSRF and session cookies.  You could use the factory to create values for the job, via a factory.build('job'). The best way to test for success is to see that the database now has 21 entries, as follows:
-    ```
+    ```javascript
         const jobs = await Job.find({createdBy: this.test_user._id})
         expect(jobs.length).to.equal(21)
     ```
@@ -435,7 +435,7 @@ The flow for testing CRUD operations is as follows.
 ## Puppeteer
 
 In actual practice, chai-http is mostly used for testing APIs. To test a user interface, whether it be server side rendered or full stack, one would use an actual browser testing engine such as puppeteer.  Create a file, tests/puppeteer.js, with the following contents:
-```
+```javascript
 const puppeteer = require("puppeteer");
 require("../app");
 const { seed_db, testUserPassword } = require("../util/seed_db");
