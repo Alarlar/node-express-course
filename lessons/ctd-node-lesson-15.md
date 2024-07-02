@@ -14,7 +14,7 @@ For Node/Express, there are several standard testing tools. Mocha is a testing f
 
 Here is a sample test case that uses Mocha and Chai.  It won't work for the present lesson, because it is for calling an API, not getting a page.
 
-```
+```javascript
 describe("Jobs", function () {
   describe("GET /jobs", function () {
   // Test to get all jobs belonging to the logged on user
@@ -42,7 +42,7 @@ Some other things to think about: We have been using a single Mongo database for
 
 With Puppeteer, you actually load the pages, find the HTML elements on the page, and interact with them, using a browser engine, which is typically Chrome.  You can run Chrome in "headless" mode, but if you do not do this, you can actually watch your test typing values into a browser window. Puppeteer involves a lot of async/await.  Here is the start of a Puppeteer test, where the connection to the browser is made and a
 page is retrieved:
-```
+```javascript
   describe("Functional Tests with Puppeteer", function () {
     let browser = null;
     let page = null;
@@ -73,7 +73,7 @@ page is retrieved:
 In the above code, this.timeout(5000) sets the timeout for that test, the amount of time by which the operation certainly should have succeeded.  We can verify that the page came up with some entry fields, identified by their HTML IDs or other attributes. To find the button, we use some special syntax provided by Puppeteer, to find a button with "Add" in the text.
 
 Then, we can start interacting with the form, as follows:
-```
+```javascript
       it("should create a person record given name and age", async () => {
         await this.nameField.type("Fred");
         await this.ageField.type("10");
