@@ -20,18 +20,23 @@ const getBody = (req, callback) => {
   });
 };
 
+// Declare variables to store game numbers
 // here, you could declare one or more variables to store what comes back from the form.
-let item = "Enter something below.";
+let targetNumber = Math.floor() * 10 + 1;
+let message = "Guess a number between 1 and 10";
+let item = "Enter guess below.";
 
+// This place where the form will include numeric input and reset
 // here, you can change the form below to modify the input fields and what is displayed.
 // This is just ordinary html with string interpolation.
 const form = () => {
   return `
   <body>
-  <p>${item}</p>
+  <p>${message}</p>
   <form method="POST">
-  <input name="item"></input>
-  <button type="submit">Submit</button>
+  <input type="number" name="guess" min="1" max="10"></input>
+  <button type="submit">Submit Guess</button>
+  <button type="submit" name="reset" value="reset">Reset Game</button>
   </form>
   </body>
   `;
@@ -43,11 +48,26 @@ const server = http.createServer((req, res) => {
   if (req.method === "POST") {
     getBody(req, (body) => {
       console.log("The body of the post is ", body);
+      // Adding logic here
       // here, you can add your own logic
-      if (body["item"]) {
-        item = body["item"];
+      if (body["reset"] === "reset") {
+        targetNumber = Math.floor(Math.random() * 100) + 1;
+        message = "New game started! Guess a number between 1 and 10!";
+        item = "Enter your guess below.";
+      } else if (body["guess"]) {
+        const guess = parseInt(body["guess"], 10);
+        if (isNaN(guess) || guess < 1 || guess > 10) {
+          message = "Please enter a valid number between 1 and 10!";
+        } else if (guess === targetNumber) {
+          message = `Correct! The number was ${targetNumber}.`;
+          item = "Game over. Guess again or reset.";
+        } else if (guess < targetNumber) {
+          message = "Too low! Try again.";
+        } else {
+          message = "Too high! Try again.";
+        }
       } else {
-        item = "Nothing was entered.";
+        message = "No valid guess submitted.";
       }
       // Your code changes would end here
       res.writeHead(303, {
