@@ -3,4 +3,5 @@ const showBooks = () => {
   console.log("Books:", books);
 };
 
-module.exports = { books, showBooks };
+module.exports.books = books;
+module.exports.showBooks = showBooks;

@@ -51,7 +51,7 @@ const server = http.createServer((req, res) => {
       // Adding logic here
       // here, you can add your own logic
       if (body["reset"] === "reset") {
-        targetNumber = Math.floor(Math.random() * 100) + 1;
+        targetNumber = Math.floor(Math.random() * 10) + 1;
         message = "New game started! Guess a number between 1 and 10!";
         item = "Enter your guess below.";
       } else if (body["guess"]) {
