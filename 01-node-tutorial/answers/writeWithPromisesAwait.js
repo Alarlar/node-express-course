@@ -1,5 +1,5 @@
 const { writeFile, readFile } = require("fs").promises;
-const path = require("path");
+const path = require("path"); // Встроенный модуль, пытался без него, запутался в путях и выдавало ошибку "file not found", пришлось искать подсказки
 
 const filePath = path.join(__dirname, "temporary", "temp.txt");
 
