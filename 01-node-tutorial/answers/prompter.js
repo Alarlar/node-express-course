@@ -43,6 +43,9 @@ const form = () => {
 };
 
 const server = http.createServer((req, res) => {
+  server.on("request", (req) => {
+    console.log("event received: ", req.method, req.url);
+  });
   console.log("req.method is ", req.method);
   console.log("req.url is ", req.url);
   if (req.method === "POST") {
