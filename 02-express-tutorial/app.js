@@ -17,6 +17,13 @@ app.get("/api/v1/products", (req, res) => {
 
 // retriving particular product by ID
 app.get("/api/v1/products/:productID", (req, res) => {
+  const idToFind = parseInt(req.params.productID);
+  const product = products.find((p) => p.id === idToFind);
+
+  // if (!product) {
+  //   return res.status(404).json({ message: "Product not found" });
+  // }
+
   res.json(req.params);
 });
 
