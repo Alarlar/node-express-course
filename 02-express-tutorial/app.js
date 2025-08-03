@@ -28,17 +28,32 @@ app.get("/api/v1/products/:productID", (req, res) => {
 });
 
 app.get("/api/v1/query", (req, res) => {
-  const { search, limit } = req.query;
+  const { search, limit, maxPrice } = req.query;
   let filteredProducts = [...products];
 
+  // filter search
   if (search) {
     filteredProducts = filteredProducts.filter((product) =>
       product.name.toLowerCase().startsWith(search.toLowerCase())
     );
   }
 
+  // filter maxPrice
+  if (maxPrice) {
+    filteredProducts = filteredProducts.filter(
+      (product) => product.price < parseFloat(maxPrice)
+    );
+  }
+
+  // Limit
   if (limit) {
     filteredProducts = filteredProducts.slice(0, Number(limit));
+  }
+
+  if (filteredProducts.length < 1) {
+    return res
+      .status(200)
+      .json({ message: "No products matched your search." });
   }
 
   res.status(200).json(filteredProducts);
