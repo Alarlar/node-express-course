@@ -27,6 +27,23 @@ app.get("/api/v1/products/:productID", (req, res) => {
   res.json(req.params);
 });
 
+app.get("/api/v1/query", (req, res) => {
+  const { search, limit } = req.query;
+  let filteredProducts = [...products];
+
+  if (search) {
+    filteredProducts = filteredProducts.filter((product) =>
+      product.name.toLowerCase().startsWith(search.toLowerCase())
+    );
+  }
+
+  if (limit) {
+    filteredProducts = filteredProducts.slice(0, Number(limit));
+  }
+
+  res.status(200).json(filteredProducts);
+});
+
 app.use((req, res) => {
   res.status(404).send("Route not found");
 });
