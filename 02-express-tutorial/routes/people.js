@@ -1,31 +1,14 @@
-const express = require('express');
-const app = express();
-let {people} = require('./data')
-// const peopleRouter = require('./routes/people')
+const express = require("express");
+const router = express.Router();
 
-// static assets, to get the form data нужно использовать работающую программу для работы с данными
-app.use(express.static('./methods-public'))
-// parse form data - adding value to body
-app.use(express.urlencoded({ extended: false }))
-// parse json
-app.use(express.json())
+let {people} = require('../data')
 
-// app.use('/api/people', peopleRouter);
 
-app.post('/login', (req, res) => {
-    const {name} = req.body;
-    if(name) {
-        return res.status(200).send(`Welcome ${name}`)
-    }
-
-   return res.status(401).json(`Welcome ${name}`)
-})
-
-app.get('/api/people', (req, res) => { // read the data
+router.get('/', (req, res) => { // read the data
     res.status(200).json({ scusses: true, data: people})
 })
 
-app.post('/api/people', (req, res) => { // add data
+router.post('/', (req, res) => { // add data
     const {name} = req.body
     if(!name) {
         return res.status(400).json({ success: false, msg: 'please provide name value'})
@@ -33,7 +16,7 @@ app.post('/api/people', (req, res) => { // add data
     res.status(201).json({success: true, person: name })
 })
 
-app.post('/api/people/postman', (req, res) => {
+router.post('/postman', (req, res) => {
     const {name} = req.body
     if(!name) {
         return res
@@ -43,7 +26,7 @@ app.post('/api/people/postman', (req, res) => {
     res.status(201).json({success: true, data: [...people, name] })
 })
 
-app.put('/api/people/:id', (req, res) => {
+router.put('/api/people/:id', (req, res) => {
     const {id} = req.params // which item
     const {name} = req.body
     
@@ -62,7 +45,7 @@ app.put('/api/people/:id', (req, res) => {
         res.status(200).json({success: true, data: newPeople})
     })
 
-    app.delete('/api/people/:id', (req, res) => {
+    router.delete('/api/people/:id', (req, res) => {
         const person = people.find((person) => person.id === Number(req.params.id))
         if(!person) {
             return res
@@ -73,7 +56,4 @@ app.put('/api/people/:id', (req, res) => {
         return res.status(200).json({success: true, data: newPeople} )
     })
 
-
-app.listen(5001, () => {
-    console.log('Server is listening on port 5001')
-})
+module.exports = router
