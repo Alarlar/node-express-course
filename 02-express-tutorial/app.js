@@ -1,28 +1,11 @@
 const express = require("express");
 const app = express();
-const logger = require("./logger");
-const authorize = require("./authorize");
+let { people } = require("./data");
 
-// req => middleware => res
-// app.use([logger, authorize])
-
-app.get("/", (req, res) => {
-  res.send("Home");
+app.get("/api/people", (req, res) => {
+  res.status(200).json({ sucess: true, data: people });
 });
 
-app.get("/about", (req, res) => {
-  res.send("About");
-});
-
-app.get("/api/products/", (req, res) => {
-  res.send("Products");
-});
-
-app.get("/api/items/", [logger, authorize], (req, res) => {
-  console.log(req.user);
-  res.send("Items");
-});
-
-app.listen(5001, () => {
-  console.log("Server is listening on port 5001");
+app.listen(3000, () => {
+  console.log("Server is listening on port 3000");
 });
