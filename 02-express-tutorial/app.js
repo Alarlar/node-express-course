@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 let {people} = require('./data')
+// const peopleRouter = require('./routes/people')
 
 // static assets, to get the form data нужно использовать работающую программу для работы с данными
 app.use(express.static('./methods-public'))
@@ -8,6 +9,8 @@ app.use(express.static('./methods-public'))
 app.use(express.urlencoded({ extended: false }))
 // parse json
 app.use(express.json())
+
+// app.use('/api/people', peopleRouter);
 
 
 app.get('/api/people', (req, res) => { // read the data
@@ -20,6 +23,16 @@ app.post('/api/people', (req, res) => { // add data
         return res.status(400).json({ success: false, msg: 'please provide name value'})
     }
     res.status(201).json({success: true, person: name })
+})
+
+app.post('/api/postman/people', (req, res) => {
+    const {name} = req.body
+    if(!name) {
+        return res
+            .status(400)
+            .json({ success: false, msg: 'please provide name value'})
+    }
+    res.status(201).json({success: true, data: [...people, name] })
 })
 
 app.post('/login', (req, res) => {
