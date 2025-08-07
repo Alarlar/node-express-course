@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Viewer</title>
+</head>
+
+<body>
+    <h1>Products</h1>
+    <button onclick="loadProducts()">Show Products</button>
+    <div id="products"></div>
+
+    <script>
+        function loadProducts() {
+            fetch('/api/v1/products')
+                .then(response => response.json())
+                .then(data => {
+                    const bucket = document.getElementById('products');
+                    bucket.innerHTML = '';
+                    data.forEach(p => {
+                        bucket.innerHTML += `<p>${p.name} - $${p.price}</p>`;
+                    });
+                });
+        }
+    </script>
+
+</body>
+
+</html>
