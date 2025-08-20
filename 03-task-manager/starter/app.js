@@ -14,7 +14,6 @@ app.get("/hello", (req, res) => {
 
 app.use('/api/v1/tasks', tasks) // root route for tasks
 
-
 const port = 5001;
 
 const start = async () => {
